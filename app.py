@@ -36,44 +36,10 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom CSS for better chat interface
+# Simple CSS for consistent layout
 st.markdown("""
 <style>
-    /* Main content area - simple offset for sidebar */
-    .main .block-container {
-        margin-left: 21rem !important;
-        padding-top: 1rem;
-        padding-bottom: 4rem;
-    }
-    
-    /* Fixed chat input */
-    .stChatInput {
-        position: fixed;
-        bottom: 0;
-        left: 21rem;
-        right: 0;
-        z-index: 999;
-        background: white;
-        border-top: 1px solid #e0e0e0;
-        padding: 1rem;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    }
-    
-    /* Mobile responsive */
-    @media (max-width: 768px) {
-        .main .block-container {
-            margin-left: 0 !important;
-        }
-        .stChatInput {
-            left: 0;
-            padding: 0.5rem;
-        }
-        .stSidebar {
-            display: none !important;
-        }
-    }
-    
-    /* Chat styling */
+    /* Basic styling only */
     .stChatMessage {
         margin-bottom: 1rem;
     }
@@ -82,71 +48,14 @@ st.markdown("""
         margin-top: 0.5rem;
     }
     
-    /* Book selection checkboxes */
+    /* Simple book selection styling */
     .stCheckbox > label {
         font-weight: 500;
-        font-size: 1.1rem;
-    }
-    
-    .stCheckbox > div {
-        background-color: #f8f9fa;
-        border-radius: 0.5rem;
-        padding: 0.75rem;
-        margin: 0.5rem 0;
-        border: 1px solid #e9ecef;
-    }
-    
-    .stCheckbox > div:hover {
-        background-color: #e9ecef;
-        border-color: #dee2e6;
-    }
-    
-    /* Selected book badges */
-    .selected-book-badge {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 1rem;
-        font-weight: 500;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    /* Compact spacing */
-    .stSelectbox, .stMultiselect, .stCheckbox, .stToggle, .stButton {
-        margin-bottom: 0.5rem !important;
-    }
-    
-    .stAlert {
-        margin-bottom: 0.5rem !important;
-    }
-    
-    .element-container {
-        margin-bottom: 0.5rem !important;
     }
     
     /* Prevent horizontal scrolling */
     .stApp {
-        overflow-x: hidden !important;
-    }
-    
-    /* Sidebar styling */
-    .stSidebar {
-        display: block !important;
-        position: fixed !important;
-        left: 0 !important;
-        top: 0 !important;
-        height: 100vh !important;
-        width: 21rem !important;
-        z-index: 1000 !important;
-    }
-    
-    /* Hide sidebar controls */
-    .stSidebar .stButton button[aria-label="Close sidebar"],
-    .stSidebar .stButton button[aria-label="Open sidebar"],
-    [data-testid="stSidebar"] button[aria-label*="sidebar"],
-    [data-testid="stSidebar"] button[aria-label*="Close"],
-    [data-testid="stSidebar"] button[aria-label*="Open"] {
-        display: none !important;
+        overflow-x: hidden;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -256,94 +165,46 @@ def query_tab():
         st.info("💡 Use: `python pipeline.py path/to/pdf --book-id book_name`")
         return
     
-    # Book selection with checkboxes
+    # Simple book selection
     st.subheader("📚 Select Books to Query")
-    st.caption("💡 Check at least one book below to start chatting. Select multiple books for side-by-side comparison.")
     
-    # Create checkboxes for each book in a grid layout
     selected_books = []
-    
-    # Create a responsive grid (2 columns for mobile, 3 for desktop)
-    num_cols = min(len(loaded_books), 3)
-    book_cols = st.columns(num_cols)
-    
-    for idx, book in enumerate(loaded_books):
-        col_idx = idx % num_cols
-        with book_cols[col_idx]:
-            # Create checkbox with book info
-            book_id = book['id']
-            book_name = book['display_name']
-            is_loaded = book['loaded']
-            
-            # Default selection: first book if none selected, or previously selected books
-            default_value = (
-                book_id in (st.session_state.selected_books if st.session_state.selected_books else [loaded_books[0]['id']])
-            )
-            
-            # Create a styled checkbox container
-            with st.container():
-                is_selected = st.checkbox(
-                    f"**{book_name}** {'✅' if is_loaded else '📥'}",
-                    value=default_value,
-                    key=f"book_checkbox_{book_id}",
-                    help=f"Status: {'Loaded in memory' if is_loaded else 'Available on disk'}"
-                )
-                
-                # Add some visual styling
-                if is_selected:
-                    st.markdown(f"<div style='background-color: #f0f8ff; padding: 0.25rem; border-radius: 0.25rem; margin: 0.25rem 0; border-left: 3px solid #2196f3;'><small>✓ Selected</small></div>", unsafe_allow_html=True)
-            
-            if is_selected:
-                selected_books.append(book_id)
+    for book in loaded_books:
+        book_id = book['id']
+        book_name = book['display_name']
+        is_loaded = book['loaded']
+        
+        # Default selection: first book if none selected, or previously selected books
+        default_value = (
+            book_id in (st.session_state.selected_books if st.session_state.selected_books else [loaded_books[0]['id']])
+        )
+        
+        is_selected = st.checkbox(
+            f"{book_name} {'✅' if is_loaded else '📥'}",
+            value=default_value,
+            key=f"book_checkbox_{book_id}"
+        )
+        
+        if is_selected:
+            selected_books.append(book_id)
     
     # Validation: At least one book must be selected
     if not selected_books:
         st.error("⚠️ Please select at least one book to chat with.")
-        st.info("💡 Check the boxes above to select religious texts for querying.")
         return
     
-    # Compact settings row
-    settings_col1, settings_col2, settings_col3 = st.columns([1, 1, 1])
-    
-    with settings_col1:
-        st.session_state.conversation_mode = st.toggle(
-            "💬 Conversation Mode",
-            value=st.session_state.conversation_mode,
-            help="Enable multi-turn conversations"
-        )
-    
-    with settings_col2:
-        if st.button("🗑️ Clear Chat", help="Clear conversation history"):
+    # Simple settings
+    col1, col2 = st.columns(2)
+    with col1:
+        st.session_state.conversation_mode = st.toggle("💬 Conversation Mode", value=st.session_state.conversation_mode)
+    with col2:
+        if st.button("🗑️ Clear Chat"):
             st.session_state.chat_messages = []
             st.session_state.multi_book_retrieval.clear_all_conversations()
             st.rerun()
     
-    with settings_col3:
-        st.write("")  # Empty column for spacing
-    
     # Update session state
-    if selected_books:
-        st.session_state.selected_books = selected_books
-        
-        # Show selected books as compact badges
-        selected_badges = []
-        for book_id in selected_books:
-            book_name = st.session_state.book_manager.get_book_display_name(book_id)
-            selected_badges.append(f"📖 {book_name.split('(')[0].strip()}")
-        
-        # Display badges compactly
-        if len(selected_badges) <= 3:
-            badge_cols = st.columns(len(selected_badges))
-            for idx, badge in enumerate(selected_badges):
-                with badge_cols[idx]:
-                    st.markdown(f"<div class='selected-book-badge' style='text-align: center; margin: 0.1rem; font-size: 0.9rem;'>{badge}</div>", unsafe_allow_html=True)
-        else:
-            # For more than 3 books, display in a more compact way
-            badge_text = " • ".join([badge.replace("📖 ", "") for badge in selected_badges])
-            st.markdown(f"<div class='selected-book-badge' style='text-align: center; margin: 0.1rem; font-size: 0.9rem;'>{badge_text}</div>", unsafe_allow_html=True)
-    else:
-        st.warning("⚠️ Please select at least one book to chat with.")
-        return
+    st.session_state.selected_books = selected_books
     
     # Load selected books if not already loaded
     for book_id in selected_books:
@@ -351,25 +212,11 @@ def query_tab():
             with st.spinner(f"Loading {st.session_state.book_manager.get_book_display_name(book_id)}..."):
                 st.session_state.book_manager.load_book(book_id)
     
-    # Advanced settings in expander
+    # Advanced settings
     with st.expander("⚙️ Advanced Options"):
-        top_k = st.slider(
-            "Number of sources to retrieve",
-            min_value=1,
-            max_value=10,
-            value=5,
-            help="How many relevant passages to use for answering",
-        )
-        
-        # Compact info messages
-        if st.session_state.conversation_mode and len(selected_books) > 1:
-            st.info(f"💬 Conversation mode • 📖 Querying {len(selected_books)} books")
-        elif st.session_state.conversation_mode:
-            st.info("💬 Conversation mode enabled")
-        elif len(selected_books) > 1:
-            st.info(f"📖 Querying {len(selected_books)} books simultaneously")
+        top_k = st.slider("Number of sources to retrieve", min_value=1, max_value=10, value=5)
     
-    
+    # Display chat messages
     for message in st.session_state.chat_messages:
         with st.chat_message(message["role"]):
             if message["role"] == "user":
@@ -386,13 +233,8 @@ def query_tab():
                             for idx, source in enumerate(message["sources"], 1):
                                 st.caption(f"**Source {idx}:** {source.get('title', 'Chunk')} (Page {source['pages']})")
     
-    
-# Removed sidebar state indicator - sidebar is always visible
-    
-    query = st.chat_input(
-        "Ask a question about the selected books..." if not st.session_state.conversation_mode else "Ask a question or follow up...",
-        key="chat_input"
-    )
+    # Chat input - part of the chat panel
+    query = st.chat_input("Ask a question about the selected books...")
     
     if query:
         # Add user message to chat
@@ -575,9 +417,6 @@ def sidebar():
         st.subheader("📥 Add New Books")
         st.caption("Use CLI to add new religious texts:")
         st.code("python pipeline.py path/to/pdf --book-id book_name", language="bash")
-        st.caption("Examples:")
-        st.caption("• python pipeline.py bible.pdf --book-id bible")
-        st.caption("• python pipeline.py quran.pdf --book-id quran")
         
         st.divider()
         
@@ -590,14 +429,6 @@ def sidebar():
             st.text(f"Chunk Size: {settings.chunk_size}")
         except:
             st.error("Configuration not loaded")
-        
-        st.divider()
-        
-        # Legend
-        with st.expander("ℹ️ Status Legend"):
-            st.caption("✅ Loaded in memory")
-            st.caption("📥 Available (not loaded)")
-            st.caption("⭕ Not ingested yet")
 
 
 def main():
@@ -626,12 +457,11 @@ def main():
     # Render sidebar
     sidebar()
     
-    # Main content
+    # Main content - simple layout
     st.title("💬 Chat with Sacred Texts")
     st.write("Ask questions and get answers from multiple religious texts simultaneously")
-    st.caption("🕉️ Bhagavad Gita • ✝️ Bible • ☪️ Quran • ➕ More...")
     
-    # Display only chat interface
+    # Display chat interface
     query_tab()
 
 
