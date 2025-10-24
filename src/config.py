@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     
     # OpenRouter API Configuration
-    openrouter_api_key: str = Field(default_factory=get_openrouter_api_key)
+    openrouter_api_key: str = Field(default="", env="OPENROUTER_API_KEY")
     openrouter_model: str = Field(
         default="anthropic/claude-3-sonnet",
         env="OPENROUTER_MODEL"
@@ -89,14 +89,20 @@ def get_settings() -> Settings:
     global _settings
     if _settings is None:
         _settings = Settings()
+        # Override with Streamlit secrets if available
+        try:
+            if hasattr(st, 'secrets') and 'OPENROUTER_API_KEY' in st.secrets:
+                _settings.openrouter_api_key = st.secrets['OPENROUTER_API_KEY']
+        except Exception:
+            pass
     return _settings
 
 
 def validate_config() -> bool:
     """Validate that required configuration is present."""
-    api_key = get_openrouter_api_key()
+    settings = get_settings()
     
-    if not api_key:
+    if not settings.openrouter_api_key:
         raise ValueError(
             "OPENROUTER_API_KEY not found. "
             "Please set it in Streamlit secrets (for Streamlit Cloud) or .env file (for local development)."
