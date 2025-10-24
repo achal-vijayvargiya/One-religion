@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional, Dict
 from pydantic_settings import BaseSettings
 from pydantic import Field
+import streamlit as st
 
 
 # Available religious books configuration
@@ -36,7 +37,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     
     # OpenRouter API Configuration
-    openrouter_api_key: str = Field(default="", env="OPENROUTER_API_KEY")
+    openrouter_api_key: str = Field(default_factory=get_openrouter_api_key)
     openrouter_model: str = Field(
         default="anthropic/claude-3-sonnet",
         env="OPENROUTER_MODEL"
@@ -93,12 +94,12 @@ def get_settings() -> Settings:
 
 def validate_config() -> bool:
     """Validate that required configuration is present."""
-    settings = get_settings()
+    api_key = get_openrouter_api_key()
     
-    if not settings.openrouter_api_key:
+    if not api_key:
         raise ValueError(
             "OPENROUTER_API_KEY not found. "
-            "Please set it in .env file or environment variables."
+            "Please set it in Streamlit secrets (for Streamlit Cloud) or .env file (for local development)."
         )
     
     return True
@@ -139,4 +140,17 @@ def get_book_info(book_id: str) -> Optional[Dict[str, str]]:
         Book information dictionary or None if not found
     """
     return AVAILABLE_BOOKS.get(book_id)
+
+
+def get_openrouter_api_key() -> str:
+    """Get OpenRouter API key from Streamlit secrets or environment."""
+    try:
+        # Try Streamlit secrets first (for Streamlit Cloud)
+        if hasattr(st, 'secrets') and 'OPENROUTER_API_KEY' in st.secrets:
+            return st.secrets['OPENROUTER_API_KEY']
+    except Exception:
+        pass
+    
+    # Fallback to environment variable
+    return os.getenv('OPENROUTER_API_KEY', '')
 
