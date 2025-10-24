@@ -30,14 +30,12 @@ ENV/
 .env
 .env.local
 
-# Vector Store
-vector_store/
-*.index
-*.pkl
-
-# Large PDF files (use Git LFS or exclude from repo)
+# PDF files (exclude original PDFs)
 resources/*.pdf
 resources/*/README.md
+
+# Include vector stores (processed embeddings) - these are the valuable processed data
+# Vector stores contain the FAISS indices and processed text chunks
 
 # IDE
 .vscode/
