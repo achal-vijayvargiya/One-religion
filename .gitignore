@@ -35,6 +35,10 @@ vector_store/
 *.index
 *.pkl
 
+# Large PDF files (use Git LFS or exclude from repo)
+resources/*.pdf
+resources/*/README.md
+
 # IDE
 .vscode/
 .idea/
