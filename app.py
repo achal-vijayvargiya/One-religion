@@ -122,6 +122,45 @@ st.markdown("""
         margin-bottom: 0.5rem !important;
     }
     
+    /* Fix content alignment and prevent horizontal scrolling */
+    .stApp {
+        overflow-x: hidden !important;
+    }
+    
+    /* Ensure proper content width */
+    .main .block-container {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Fix any potential overflow issues */
+    .stSelectbox, .stMultiselect, .stCheckbox, .stToggle, .stButton {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Fix page title and header alignment */
+    .stApp > header {
+        margin-left: 21rem !important;
+        width: calc(100vw - 21rem) !important;
+    }
+    
+    /* Ensure all content is properly contained */
+    .stApp > div {
+        margin-left: 21rem !important;
+        width: calc(100vw - 21rem) !important;
+        max-width: calc(100vw - 21rem) !important;
+    }
+    
+    @media (max-width: 768px) {
+        .stApp > header,
+        .stApp > div {
+            margin-left: 0 !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+        }
+    }
+    
     /* Hide sidebar close button */
     .stSidebar .stButton button[aria-label="Close sidebar"] {
         display: none !important;
@@ -154,10 +193,22 @@ st.markdown("""
     /* Ensure main content area accounts for fixed sidebar */
     .main .block-container {
         margin-left: 21rem !important;
+        max-width: calc(100vw - 21rem) !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    
+    /* Fix the main content positioning */
+    .main {
+        margin-left: 21rem !important;
     }
     
     @media (max-width: 768px) {
         .main .block-container {
+            margin-left: 0 !important;
+            max-width: 100vw !important;
+        }
+        .main {
             margin-left: 0 !important;
         }
         .stSidebar {
@@ -387,8 +438,6 @@ def query_tab():
         elif len(selected_books) > 1:
             st.info(f"📖 Querying {len(selected_books)} books simultaneously")
     
-    # Chat messages section
-    st.markdown("---")
     
     for message in st.session_state.chat_messages:
         with st.chat_message(message["role"]):
@@ -406,8 +455,6 @@ def query_tab():
                             for idx, source in enumerate(message["sources"], 1):
                                 st.caption(f"**Source {idx}:** {source.get('title', 'Chunk')} (Page {source['pages']})")
     
-    # Fixed chat input at the bottom
-    st.markdown("---")
     
 # Removed sidebar state indicator - sidebar is always visible
     
