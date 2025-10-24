@@ -32,17 +32,34 @@ class VectorStoreManager:
         
         logger.info(f"Initializing VectorStoreManager with model: {self.embedding_model_name}, book_id: {book_id}")
         
-        # Load the sentence transformer model
-        print(f"Loading embedding model: {self.embedding_model_name}")
-        self.embedding_model = SentenceTransformer(self.embedding_model_name)
-        self.embedding_dim = self.embedding_model.get_sentence_embedding_dimension()
-        
-        logger.info(f"Embedding model loaded successfully (dimension: {self.embedding_dim})")
+        # Initialize embedding model lazily to avoid device issues during startup
+        self.embedding_model = None
+        self.embedding_dim = None
         
         # FAISS index and metadata storage
         self.index: Optional[faiss.Index] = None
         self.documents: List[Document] = []
         self.metadata: List[Dict[str, Any]] = []
+    
+    def _ensure_embedding_model(self):
+        """Ensure the embedding model is loaded (lazy loading)."""
+        if self.embedding_model is None:
+            print(f"Loading embedding model: {self.embedding_model_name}")
+            try:
+                # Try to load with CPU first to avoid device issues
+                self.embedding_model = SentenceTransformer(self.embedding_model_name, device='cpu')
+                self.embedding_dim = self.embedding_model.get_sentence_embedding_dimension()
+            except Exception as e:
+                logger.warning(f"Failed to load model with CPU device: {e}")
+                try:
+                    # Fallback: try without specifying device
+                    self.embedding_model = SentenceTransformer(self.embedding_model_name)
+                    self.embedding_dim = self.embedding_model.get_sentence_embedding_dimension()
+                except Exception as e2:
+                    logger.error(f"Failed to load embedding model: {e2}")
+                    raise RuntimeError(f"Could not load embedding model {self.embedding_model_name}: {e2}")
+            
+            logger.info(f"Embedding model loaded successfully (dimension: {self.embedding_dim})")
     
     def _embed_texts(self, texts: List[str]) -> np.ndarray:
         """
@@ -54,6 +71,7 @@ class VectorStoreManager:
         Returns:
             Numpy array of embeddings
         """
+        self._ensure_embedding_model()
         logger.debug(f"Creating embeddings for {len(texts)} texts")
         embeddings = self.embedding_model.encode(
             texts,
