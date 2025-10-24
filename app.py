@@ -39,16 +39,18 @@ st.set_page_config(
 # Custom CSS for better chat interface
 st.markdown("""
 <style>
+    /* Main content area - simple offset for sidebar */
     .main .block-container {
+        margin-left: 21rem !important;
         padding-top: 1rem;
-        padding-bottom: 4rem; /* Reduced bottom padding for fixed input */
+        padding-bottom: 4rem;
     }
     
-    /* Fixed chat input that accounts for always-visible sidebar */
+    /* Fixed chat input */
     .stChatInput {
         position: fixed;
         bottom: 0;
-        left: 21rem; /* Always account for sidebar width */
+        left: 21rem;
         right: 0;
         z-index: 999;
         background: white;
@@ -57,14 +59,21 @@ st.markdown("""
         box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
     }
     
-    /* Mobile responsive - full width on small screens */
+    /* Mobile responsive */
     @media (max-width: 768px) {
+        .main .block-container {
+            margin-left: 0 !important;
+        }
         .stChatInput {
             left: 0;
             padding: 0.5rem;
         }
+        .stSidebar {
+            display: none !important;
+        }
     }
     
+    /* Chat styling */
     .stChatMessage {
         margin-bottom: 1rem;
     }
@@ -73,7 +82,7 @@ st.markdown("""
         margin-top: 0.5rem;
     }
     
-    /* Style for book selection checkboxes */
+    /* Book selection checkboxes */
     .stCheckbox > label {
         font-weight: 500;
         font-size: 1.1rem;
@@ -102,77 +111,25 @@ st.markdown("""
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    /* Compact chat container */
-    .chat-container {
-        padding-bottom: 1rem;
-    }
-    
-    /* Reduce spacing in Streamlit elements */
+    /* Compact spacing */
     .stSelectbox, .stMultiselect, .stCheckbox, .stToggle, .stButton {
         margin-bottom: 0.5rem !important;
     }
     
-    /* Compact info messages */
     .stAlert {
         margin-bottom: 0.5rem !important;
     }
     
-    /* Reduce spacing between sections */
     .element-container {
         margin-bottom: 0.5rem !important;
     }
     
-    /* Fix content alignment and prevent horizontal scrolling */
+    /* Prevent horizontal scrolling */
     .stApp {
         overflow-x: hidden !important;
     }
     
-    /* Ensure proper content width */
-    .main .block-container {
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* Fix any potential overflow issues */
-    .stSelectbox, .stMultiselect, .stCheckbox, .stToggle, .stButton {
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* Fix page title and header alignment */
-    .stApp > header {
-        margin-left: 21rem !important;
-        width: calc(100vw - 21rem) !important;
-    }
-    
-    /* Ensure all content is properly contained */
-    .stApp > div {
-        margin-left: 21rem !important;
-        width: calc(100vw - 21rem) !important;
-        max-width: calc(100vw - 21rem) !important;
-    }
-    
-    @media (max-width: 768px) {
-        .stApp > header,
-        .stApp > div {
-            margin-left: 0 !important;
-            width: 100vw !important;
-            max-width: 100vw !important;
-        }
-    }
-    
-    /* Hide sidebar close button */
-    .stSidebar .stButton button[aria-label="Close sidebar"] {
-        display: none !important;
-    }
-    
-    /* Hide sidebar toggle button */
-    .stSidebar .stButton button[aria-label="Close sidebar"],
-    .stSidebar .stButton button[aria-label="Open sidebar"] {
-        display: none !important;
-    }
-    
-    /* Ensure sidebar is always visible and cannot be collapsed */
+    /* Sidebar styling */
     .stSidebar {
         display: block !important;
         position: fixed !important;
@@ -183,41 +140,15 @@ st.markdown("""
         z-index: 1000 !important;
     }
     
-    /* Hide any sidebar toggle elements */
+    /* Hide sidebar controls */
+    .stSidebar .stButton button[aria-label="Close sidebar"],
+    .stSidebar .stButton button[aria-label="Open sidebar"],
     [data-testid="stSidebar"] button[aria-label*="sidebar"],
     [data-testid="stSidebar"] button[aria-label*="Close"],
     [data-testid="stSidebar"] button[aria-label*="Open"] {
         display: none !important;
     }
-    
-    /* Ensure main content area accounts for fixed sidebar */
-    .main .block-container {
-        margin-left: 21rem !important;
-        max-width: calc(100vw - 21rem) !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-    
-    /* Fix the main content positioning */
-    .main {
-        margin-left: 21rem !important;
-    }
-    
-    @media (max-width: 768px) {
-        .main .block-container {
-            margin-left: 0 !important;
-            max-width: 100vw !important;
-        }
-        .main {
-            margin-left: 0 !important;
-        }
-        .stSidebar {
-            display: none !important;
-        }
-    }
 </style>
-
-<!-- Removed JavaScript sidebar handling - sidebar is always visible -->
 """, unsafe_allow_html=True)
 
 
